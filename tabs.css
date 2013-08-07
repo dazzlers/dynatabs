@@ -63,3 +63,30 @@ div.tabcontents
     background-color:#FFF;
     border-radius: 0 3px 3px 3px;
 }
+
+.closeable
+{
+    background-image: url('close.png')  ;
+	height: 16px;
+	width: 16px;
+	display: inline-block;
+	position: relative;
+    right: -13px;
+    top: 4px;
+    width: 16px;
+}
+.tabLoader
+{
+	background-image: url('tab_loader.gif')  ;
+	height: 16px;
+	width: 16px;
+	display: inline-block;
+	position: relative;
+    right: -13px;
+    top: 4px;
+    width: 16px;
+}
+.tabcontents .unselected
+{
+	display: none;
+}
