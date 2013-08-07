@@ -1,14 +1,13 @@
 (
-  function($){
+	function($){
 		
 		var ctTab = Object();
 		var ctKey = Object();
-		var tabs = null;
 		var tabList = Object();
 		
 		$.fn.dynatabs = function(options){
 			
-			tabs = this;
+			var tabs = $(this.selector);
 			
 			var settings = $.extend({
 				
@@ -16,13 +15,13 @@
 				defaultTab: 0, //default is 0 - first tab
 				deactiveClass : 'unselected',
 				activeClass : 'selected',
-				showCloseBtn : true, //shows the close button on the tabs
+				showCloseBtn : false, //shows the close button on the tabs
 				closeableClass : 'closeable',
 				tabLoaderClass : 'tabLoader',
-				confirmDelete : true,
+				confirmDelete : false,
 				confirmMessage : 'Delete Tab?',
 				switchToNewTab : true,
-				debug : true
+				debug : false
 				
 			},options);
 			
@@ -177,6 +176,7 @@
 				
 				settings.tabBodyID = tabBody;
 				tabs = $("#"+defaults.tabID);
+				$.fn.debug('Tab ID : ' + defaults.tabID);
 				if(defaults.type === 'html')
 				{
 					if(defaults.html != null && defaults.html.length > 0)
@@ -188,10 +188,10 @@
 						//create data div
 						var div = $("<div />");
 						var len = tabs.find("li").length + 1;
-						$(a).attr('href', '#tabview' + len);
+						$(a).attr('href', '#tabview' + '_' + settings.tabBodyID + len);
 						$(a).text(defaults.tabTitle);
 						$(li).append(a);
-						$(div).attr('id', 'tabview' + len);
+						$(div).attr('id', 'tabview' + '_' + settings.tabBodyID + len);
 						$(div).html(defaults.html);
 						//append to tab list
 						tabs.append(li);
@@ -218,10 +218,10 @@
 						//create data div
 						var div = $("<div />");
 						var len = tabs.find("li").length + 1;
-						$(a).attr('href', '#tabview' + len);
+						$(a).attr('href', '#tabview' + '_' + settings.tabBodyID + len);
 						$(a).text(defaults.tabTitle);
 						$(li).append(a);
-						$(div).attr('id', 'tabview' + len);
+						$(div).attr('id', 'tabview' + '_' + settings.tabBodyID + len);
 						$(div).html($("#" + defaults.divID).html());
 						//append to tab list
 						tabs.append(li);
@@ -246,9 +246,9 @@
 						//create data div
 						var div = $("<div />");
 						var len = tabs.find("li").length + 1;
-						$(a).attr('href', '#tabview' + len);
+						$(a).attr('href', '#tabview' + '_' + settings.tabBodyID + len);
 						$(a).text(defaults.tabTitle);
-						$(div).attr('id', 'tabview' + len);
+						$(div).attr('id', 'tabview' + '_' + settings.tabBodyID + len);
 						$(li).append(a);
 						$(div).html("Loading...");
 						//append to tab list
@@ -265,16 +265,10 @@
 						$.fn.addTabLoader(a);
 						
 						$.ajax({
-							
 							url : defaults.url,
 							type: defaults.method,
 							data: defaults.params,
-							dataType: defaults.dtype,
-							statusCode: {
-								 404: function() {
-									 	alert("page not found");
-									 }
-							}
+							dataType: defaults.dtype
 						}).done(function(response){
 							$.fn.debug('obtained response..');
 							$(div).html(response);
@@ -283,6 +277,8 @@
 							$.fn.addCloseBtn(a);
 						}).fail(function(){
 							alert('Failed to load the ajax page');
+							$(div).remove();
+							$(li).remove();
 						});
 						
 					}
@@ -297,29 +293,35 @@
 				
 				//hide all tabs other than the default tab index
 				var ct = 0;
+				$.fn.debug('Tab Body ID -->' + settings.tabBodyID);
 				$.each($("#" + settings.tabBodyID + " > div"), function(idx, div){
 					if(ct != settings.defaultTab)
 					{
-						$(div).addClass(settings.deactiveClass);
+						$.fn.debug('Hiding -- ' + div.outerHTML);
+						$(div).hide();
 						ct = ct + 1;
 					}
 					else
 					{
+						$.fn.debug('Showing -- ' + div.outerHTML);
 						ct = ct + 1;
 					}	
 				});
 				
 				//add the selected class to the title also
+				$.fn.debug(tabs);
+				$.fn.debug('Tab Lengths --> ' + tabs.find("li").length);
 				if(settings.defaultTab < tabs.find("li").length)
 				{
 					this.debug('setting active tab --> Index ' + settings.defaultTab);
+					$(tabs.find("li")[settings.defaultTab]).removeClass(settings.deactiveClass);
 					$(tabs.find("li")[settings.defaultTab]).addClass(settings.activeClass);
 					ctTab[tabs.attr('id')] = $(tabs.find("li")[0]).find("a");
 					ctKey[tabs.attr('id')] =  $(tabs.find("li")[0]).find("a").attr('href');
 				}
 				else
 				{
-					this.debug('Index ' + settings.defaultTab + ' does not map to li');
+					$.fn.debug('Index ' + settings.defaultTab + ' does not map to li');
 				}
 				
 				//add close buttons as neccessary to all tabs and bind clicks
